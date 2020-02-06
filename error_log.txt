@@ -1,0 +1,5 @@
+Wed Feb  5 16:40:47 2020 could not convert string to float: 'vc cd c'
+Wed Feb  5 16:40:52 2020 could not convert string to float: ''
+Wed Feb  5 16:40:52 2020 could not convert string to float: ''
+Wed Feb  5 16:40:54 2020 could not convert string to float: ''
+Wed Feb  5 16:41:03 2020 could not convert string to float: 'fgfc'
