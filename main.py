@@ -1,19 +1,22 @@
-from time import strftime, ctime
 import json
+from time import strftime, ctime
 
 
-def show_logs():
+def show_logs(data, condition=None):
+    if condition is None:
+        condition = lambda the_time: True
+
     print("{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:^15s} | {:^16s}"
           .format("Client", "Product", "Qty", "Price", "Total", "Time"))
-    print("\n{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:^15s} | {:^16s}"
-          .format("Client", "Product", "Qty", "Price", "Total", "Time"), file=SHOW_LOGS_FILE)
-    print("-" * 90)
-    print("-" * 90, file=SHOW_LOGS_FILE)
+    print("-" * 84)
 
-    for transaction in DATA:
+    for transaction in data:
+        time = transaction['time']
+        if not condition(time):
+            continue
+
         client_name = transaction['customer_name']
         products = transaction['product']
-        time = transaction['time']
 
         overall_total = 0
         for product in products:
@@ -28,16 +31,12 @@ def show_logs():
             product_price = f'{product_price:,.2f}'
             print(
                 f"{client_name:<12s} | {product_name:<12s} | {product_quantity:^4.0f} | {product_price:>9s} | {total:>15s} | {time:>16s}")
-            print(f"{client_name:<12s} | {product_name:<12s} | {product_quantity:^4.0f} | {product_price:>9s} | {total:>15s} | {time:>16s}", file=SHOW_LOGS_FILE)
             client_name = ''
 
         overall_total = f'{overall_total:,.2f}'
         print("{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:>15s} | {:>16s}"
               .format("", "", "", "", overall_total, time))
-        print("{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:>15s} | {:>16s}"
-              .format("", "", "", "", overall_total, time), file=SHOW_LOGS_FILE)
-        print("-" * 90)
-        print("-" * 90, file=SHOW_LOGS_FILE)
+        print("-" * 84)
 
 
 def save_data(client_name, product_information):
@@ -51,19 +50,25 @@ def save_data(client_name, product_information):
 
 
 def end_program():
-    # backup data and exit program
+    '''
+    backup data and quit program
+    '''
 
-    with open("cash_register_backup.json", "w") as backup:
-        json.dump(DATA, backup)
-        
-    show_logs()
+    # back up data as json
+    with open('cash_register_backup.json', 'w') as f:
+        json.dump(DATA, f)
+
+    # disp;ay all logs
+    show_logs(DATA)
+
+    # quit program
     exit()
 
 
 def get_number_input(prompt):
-    """
+    '''
     use prompt to collects input and return float
-    """
+    '''
 
     # initialize value
     value = None
@@ -129,14 +134,15 @@ def main():
 
 
 if __name__ == '__main__':
-    # super globals
+    # superglobals
     ERROR_FILE = open('error_log.txt', 'a')
-    SHOW_LOGS_FILE = open('show_logs.txt', 'a')
     DATA = []
+
+    with open('cash_register_backup.json') as f:
+        DATA = json.load(f)
 
     # the main code
     main()
 
     # close file
-    SHOW_LOGS_FILE.close()
     ERROR_FILE.close()
