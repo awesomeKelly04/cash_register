@@ -1,10 +1,14 @@
 from time import strftime, ctime
+import json
 
 
 def show_logs():
     print("{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:^15s} | {:^16s}"
           .format("Client", "Product", "Qty", "Price", "Total", "Time"))
+    print("\n{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:^15s} | {:^16s}"
+          .format("Client", "Product", "Qty", "Price", "Total", "Time"), file=SHOW_LOGS_FILE)
     print("-" * 90)
+    print("-" * 90, file=SHOW_LOGS_FILE)
 
     for transaction in DATA:
         client_name = transaction['customer_name']
@@ -24,12 +28,16 @@ def show_logs():
             product_price = f'{product_price:,.2f}'
             print(
                 f"{client_name:<12s} | {product_name:<12s} | {product_quantity:^4.0f} | {product_price:>9s} | {total:>15s} | {time:>16s}")
+            print(f"{client_name:<12s} | {product_name:<12s} | {product_quantity:^4.0f} | {product_price:>9s} | {total:>15s} | {time:>16s}", file=SHOW_LOGS_FILE)
             client_name = ''
 
         overall_total = f'{overall_total:,.2f}'
         print("{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:>15s} | {:>16s}"
               .format("", "", "", "", overall_total, time))
-        print("-" * 84)
+        print("{:^12s} | {:^12s} | {:^4s} | {:^9s} | {:>15s} | {:>16s}"
+              .format("", "", "", "", overall_total, time), file=SHOW_LOGS_FILE)
+        print("-" * 90)
+        print("-" * 90, file=SHOW_LOGS_FILE)
 
 
 def save_data(client_name, product_information):
@@ -42,10 +50,12 @@ def save_data(client_name, product_information):
     )
 
 
-def end_program(client_name=None, product_information=None):
-    if product_information is not None:
-        save_data(client_name, product_information)
+def end_program():
+    # backup data and exit program
 
+    with open("cash_register_backup.json", "w") as backup:
+        json.dump(DATA, backup)
+        
     show_logs()
     exit()
 
@@ -121,10 +131,12 @@ def main():
 if __name__ == '__main__':
     # super globals
     ERROR_FILE = open('error_log.txt', 'a')
+    SHOW_LOGS_FILE = open('show_logs.txt', 'a')
     DATA = []
 
     # the main code
     main()
 
     # close file
+    SHOW_LOGS_FILE.close()
     ERROR_FILE.close()
